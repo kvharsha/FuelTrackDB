@@ -1,0 +1,17 @@
+# backend/.dockerignore
+
+# Ignore the virtual environment
+venv/
+
+# Ignore compiled python files
+__pycache__/
+
+# Ignore project secrets
+.env
+
+# Ignore Git files
+.git
+
+# Ignore Docker files used in development/deployment
+Dockerfile
+docker-compose.yml

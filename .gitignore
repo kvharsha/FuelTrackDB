@@ -1,0 +1,12 @@
+# Ignore local backend .env with secrets
+/backend/.env
+
+# Node modules (frontend)
+/frontend/node_modules/
+
+# Python virtual envs
+/backend/venv/
+
+# Database files
+fueltrackdb_fueltrack_data
+node_modules

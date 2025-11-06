@@ -1,0 +1,129 @@
+.auth-page-container {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-background {
+    /* Make the background fixed to the viewport so it always covers full screen */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* PLACE YOUR IMAGE HERE */
+    background-image: url('/auth-background-image.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    /* avoid browser-specific fixed attachment issues inside containers */
+    background-attachment: scroll;
+    background-position: center center;
+    filter: brightness(0.8);
+    z-index: 1;
+    /* Do not intercept pointer events so form inputs remain interactive */
+    pointer-events: none;
+}
+
+/* Fading effect: darkens edges and keeps center clear */
+.auth-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Subtle top->bottom fade so background image remains visible across full width */
+    background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.8) 100%);
+    z-index: 2;
+    /* Overlay is decorative; don't block inputs */
+    pointer-events: none;
+}
+
+.auth-form-card {
+    position: relative;
+    z-index: 3;
+    padding: 40px;
+    background-color: rgba(255, 255, 255, 0.12); /* Improved opacity */
+    backdrop-filter: blur(10px); /* Enhanced blur */
+    -webkit-backdrop-filter: blur(10px); /* Safari support */
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    color: white;
+    max-width: 450px;
+    /* Use min() so the card is at most 450px but shrinks on small screens */
+    width: min(450px, 90%);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Subtle parallax effect on background */
+.auth-background {
+    transition: transform 0.1s ease-out;
+}
+
+.auth-page-container:hover .auth-background {
+    transform: scale(1.02);
+}
+
+/* Ensure the form card is centered in the viewport and that long forms scroll inside the card */
+.auth-page-container .auth-form-card {
+    /* center the card using fixed positioning for more predictable behavior
+       Use !important to avoid being overridden by other styles or component
+       inline styles from MUI. This is safe here because this is the
+       authentication entry card and must be centered. */
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex;
+    flex-direction: column;
+    margin: 0 !important;
+    /* Don't exceed viewport height; allow internal scrolling when content is tall */
+    max-height: calc(100vh - 80px) !important;
+    overflow: hidden !important; /* hide any external overflow; internal part will scroll */
+}
+
+/* Responsive fallback for very small screens (allow natural flow + internal scroll) */
+@media (max-width: 720px) {
+    /* On smaller screens use normal document flow so the keyboard and safe areas behave properly */
+    .auth-page-container .auth-form-card {
+        position: relative;
+        left: auto;
+        top: auto;
+        transform: none;
+        width: 96%;
+        max-width: 96%;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 24px auto;
+    }
+    .auth-page-container {
+        align-items: flex-start; /* keep card visible near top where mobile keyboards appear */
+        padding-top: 24px;
+    }
+}
+
+.auth-form-card .form-scroll {
+    overflow-y: auto;
+    /* leave some breathing room inside the card for controls */
+    padding-right: 6px; /* room for scrollbar */
+}
+
+/* Admin Login Theme (Minimal/Professional) */
+.admin-login-container .auth-form-card {
+    background-color: rgba(10, 20, 30, 0.8); /* Darker, minimal theme */
+    color: #e0e0e0;
+}
+
+/* Admin background: keep the image anchored to bottom so the fade shows at bottom */
+.admin-login-container .auth-background {
+    background-position: center bottom;
+    filter: brightness(0.6) contrast(0.95);
+}

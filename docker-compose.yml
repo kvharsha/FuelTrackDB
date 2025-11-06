@@ -1,0 +1,73 @@
+# fueltrack_project/docker-compose.yml
+
+services:
+  # 1. Database Service (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: fueltrack_db_container
+    restart: always
+    # Load DB initialization variables from backend/.env to avoid committing
+    # secrets into docker-compose.yml. backend/.env contains both MYSQL_* and
+    # DB_* variables so Django and the MySQL image can read the values.
+    env_file:
+      - ./backend/.env
+    ports:
+      # Maps host port 3306 to container port 3306
+      - "3307:3306" 
+    volumes:
+      # Mount your SQL file to initialize the database schema/data
+      - ./mini_project_final.sql:/docker-entrypoint-initdb.d/init.sql
+      - fueltrack_data:/var/lib/mysql
+    healthcheck:
+      # Use CMD-SHELL so the container's shell expands the env vars. Use $$ to
+      # prevent docker-compose from interpolating variables at parse time.
+      # The ENTRYPOINT will see $MYSQL_USER/$MYSQL_PASSWORD at runtime.
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  # 2. Django Backend API Service
+  api:
+    build: 
+      context: ./backend # Dockerfile is in the backend directory
+      dockerfile: Dockerfile
+    container_name: fueltrack_api_container
+    restart: always
+    command: /usr/local/bin/wait-for-db.sh db 3306 python manage.py runserver 0.0.0.0:8000
+    # The 'db' and '3306' arguments are the hostname and port for the wait script
+    # The remaining arguments are the Django command to run after the wait.
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    # CRITICAL: This allows the API container to connect to the DB container
+    # using the service name 'db' defined above.
+    # Add DB_HOST into the same `environment` block so keys are not duplicated.
+    # (Moved above — keep this comment for clarity.)
+
+  # 3. React Frontend Web Service (Dev Environment)
+  web:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev # We'll create this dev Dockerfile
+    container_name: fueltrack_web_container
+    command: npm run dev -- --host 0.0.0.0
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Important: Don't overwrite node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      # React app needs to know where the Django API is
+      VITE_API_BASE_URL: http://localhost:8000/api/ 
+    depends_on:
+      - api
+
+volumes:
+  fueltrack_data:

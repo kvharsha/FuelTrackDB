@@ -1,0 +1,160 @@
+/* Full-screen map container */
+.map-page-container {
+    height: 100vh; 
+    width: 100vw;
+    z-index: 1;
+    position: relative;
+}
+
+/* Base style for all floating controls (top-right, bottom-right, center) */
+.floating-controls {
+    position: absolute;
+    z-index: 2000; /* Must be above the map and the left panel */
+}
+
+/* Floating Left Panel style (Fixes Transparency) */
+.floating-panel {
+    transition: width 0.3s ease-in-out, background-color 0.3s;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 30px; /* 1 cm into the screen */
+    /* 🛑 FIX: Use a high opacity dark background and blur */
+    background-color: rgba(10, 20, 30, 0.95); 
+    color: white;
+    z-index: 1000; 
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.6);
+    overflow-x: hidden;
+    padding: 0;
+    backdrop-filter: blur(5px); 
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.floating-panel.expanded {
+    width: 300px; /* Expanded width */
+}
+
+/* Style for inner list items in the expanded panel */
+.panel-content h6, .panel-content p {
+    margin-left: 20px;
+}
+
+/* Floating element hover effect (The "deflect" effect) */
+.floating-controls {
+    transition: transform 0.18s ease;
+    transform: scale(1);
+}
+
+.floating-controls:hover {
+    transform: scale(1.03);
+}
+
+.floating-deflect-item {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.floating-deflect-item:hover {
+    /* Slightly bigger (10% scale) and a prominent shadow */
+    transform: scale(1.1); 
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Marker animations */
+.custom-marker {
+    animation: fadeInMarker 0.5s ease-in;
+}
+
+@keyframes fadeInMarker {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Popup animations */
+.leaflet-popup-content-wrapper {
+    animation: fadeInPopup 0.3s ease-out;
+}
+
+@keyframes fadeInPopup {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Top Right Header / Avatar */
+.header-menu-button {
+    top: 20px;
+    right: 20px;
+}
+
+/* Center Search Bar */
+.search-bar-container, .center-search-bar {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    max-width: 80vw;
+}
+
+/* Suggestions dropdown shown under the center search bar */
+.center-search-bar-suggestions {
+    top: 70px; /* below the search bar */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    max-width: 80vw;
+    position: absolute;
+    z-index: 2500;
+    max-height: 320px;
+    overflow-y: auto;
+    background-color: rgba(255,255,255,0.95);
+    color: #111;
+    border-radius: 8px;
+}
+
+/* Bottom Right Controls */
+.bottom-right-controls {
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bottom-right-controls .MuiButtonBase-root {
+    margin-top: 10px;
+}
+
+/* Bottom Left Layers Toggle */
+.layers-toggle-container {
+    bottom: 20px;
+    left: 40px; /* Next to the left panel */
+}
+
+/* Map Layers Popup (opens upwards) */
+.map-layers-popup {
+    position: absolute;
+    bottom: 60px; /* Above the button */
+    left: 0;
+    padding: 10px;
+    background-color: rgba(10, 20, 30, 0.95); 
+    border-radius: 8px;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}

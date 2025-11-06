@@ -1,0 +1,14 @@
+# frontend/.dockerignore
+
+# Ignore unnecessary files
+dist/
+.env
+
+# Keep node_modules outside of the initial context copy to rely on the Dockerfile install
+# However, since we use volumes, ignoring it in the context copy is less critical
+# but still good practice to ensure clean builds.
+
+# Ignore build artifacts and cache
+build/
+.git/
+.vscode/
