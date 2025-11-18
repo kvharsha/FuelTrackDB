@@ -13,7 +13,7 @@ import BatteryFullIcon from '@mui/icons-material/BatteryFull';
 import Battery3BarIcon from '@mui/icons-material/Battery3Bar';
 import Battery1BarIcon from '@mui/icons-material/Battery1Bar';
 import Battery0BarIcon from '@mui/icons-material/Battery0Bar';
-import { WifiQuality } from '../../store/mapSlice';
+import type { WifiQuality } from '../../store/mapSlice';
 import { getWifiQuality } from '../../utils/wifi';
 
 interface MapControlsProps {

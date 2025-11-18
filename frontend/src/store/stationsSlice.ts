@@ -1,5 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Station } from '../api/stations';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+
+import type { Station } from '../api/stations';
 
 export type FuelTypeFilter = 'cng' | 'petrol' | 'diesel' | 'ev_ac' | 'ev_dc' | 'lpg' | null;
 export type SortOption = 'distance' | 'price' | 'rating';

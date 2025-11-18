@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import LayersIcon from '@mui/icons-material/Layers';
-import { MapLayer } from '../../store/mapSlice';
+import type { MapLayer } from '../../store/mapSlice';
 
 interface LayerPickerProps {
   activeLayer: MapLayer;

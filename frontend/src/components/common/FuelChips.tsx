@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Chip } from '@mui/material';
-import { FuelTypeFilter } from '../../store/stationsSlice';
+import type { FuelTypeFilter } from '../../store/stationsSlice';
 
 interface FuelChipsProps {
   selected: FuelTypeFilter;

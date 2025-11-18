@@ -1,5 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { OfflinePackage } from '../api/offline';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+
+import type { OfflinePackage } from '../api/offline';
 
 interface OfflineState {
   packages: OfflinePackage[];

@@ -1,5 +1,5 @@
 import apiClient from './axios';
-import { Station, FuelType, StationFuel } from './stations';
+import type { Station, FuelType, StationFuel } from './stations';
 
 export interface User {
   user_id: number;

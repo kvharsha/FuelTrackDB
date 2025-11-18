@@ -27,6 +27,10 @@ CREATE TABLE `users` (
   `phone` VARCHAR(30) DEFAULT NULL,
   `role` ENUM('user','admin') NOT NULL DEFAULT 'user',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_login` DATETIME DEFAULT NULL,
+  `is_superuser` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_staff` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `uq_users_email` (`email`)
 );
@@ -51,6 +55,7 @@ CREATE TABLE `fuel_types` (
   `fuel_type_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(50) NOT NULL,
   `description` VARCHAR(255) DEFAULT NULL,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`fuel_type_id`),
   UNIQUE KEY `uq_fuel_types_name` (`name`)
 ) ;
@@ -71,6 +76,7 @@ CREATE TABLE `stations` (
   `opening_hours` VARCHAR(100) DEFAULT NULL,
   `phone` VARCHAR(30) DEFAULT NULL,
   `status` ENUM('Operational','Under Construction','Closed') NOT NULL DEFAULT 'Operational',
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   `eta_date` DATE DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -88,12 +94,15 @@ CREATE TABLE `stations` (
 -- Create station_fuels (junction: station <-> fuel_type)
 -- ============================================================
 CREATE TABLE `station_fuels` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `station_id` INT UNSIGNED NOT NULL,
   `fuel_type_id` INT UNSIGNED NOT NULL,
   `price_per_unit` DECIMAL(10,2) DEFAULT NULL, -- e.g., price per litre or per kWh
   `is_available` INT(1) NOT NULL DEFAULT 1,
   `last_price_update` TIMESTAMP NULL DEFAULT NULL,
-  PRIMARY KEY (`station_id`,`fuel_type_id`),
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_station_fuels_station_fuel` (`station_id`,`fuel_type_id`),
   CONSTRAINT `fk_station_fuels_station`
     FOREIGN KEY (`station_id`)
     REFERENCES `stations` (`station_id`)
@@ -156,10 +165,12 @@ CREATE TABLE `offline_packages` (
 -- Create favorites (user bookmarks)
 -- ============================================================
 CREATE TABLE `favorites` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INT UNSIGNED NOT NULL,
   `station_id` INT UNSIGNED NOT NULL,
   `added_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`,`station_id`),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_favorites_user_station` (`user_id`,`station_id`),
   CONSTRAINT `fk_favorites_user`
     FOREIGN KEY (`user_id`)
     REFERENCES `users` (`user_id`)
@@ -171,6 +182,19 @@ CREATE TABLE `favorites` (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 ) ;
+
+-- ============================================================
+-- Token table for DRF authtoken (created to match Django's authtoken
+-- app). This ensures the docker DB init creates the table so the
+-- backend doesn't need manual post-init SQL during compose up.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `authtoken_token` (
+  `key` VARCHAR(40) NOT NULL PRIMARY KEY,
+  `user_id` INT UNSIGNED NOT NULL UNIQUE,
+  `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_authtoken_user_id` (`user_id`),
+  CONSTRAINT `fk_authtoken_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 -- ============================================================
 -- End of DDL

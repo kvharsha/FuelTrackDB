@@ -1,4 +1,4 @@
-import { Station } from '../api/stations';
+import type { Station } from '../api/stations';
 
 /**
  * Simple fuzzy search without external dependencies

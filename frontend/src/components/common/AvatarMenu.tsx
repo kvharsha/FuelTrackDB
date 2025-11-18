@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Avatar, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import type { RootState } from '../../store';
 import { logout } from '../../store/authSlice';
 import { toggleTheme } from '../../store/uiSlice';
 import SettingsIcon from '@mui/icons-material/Settings';

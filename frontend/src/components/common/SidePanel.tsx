@@ -19,11 +19,11 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import HistoryIcon from '@mui/icons-material/History';
 import DownloadIcon from '@mui/icons-material/Download';
 import StarIcon from '@mui/icons-material/Star';
-import { Station } from '../../api/stations';
-import { OfflinePackage } from '../../api/offline';
+import type { Station } from '../../api/stations';
+import type { OfflinePackage } from '../../api/offline';
 import RatingStars from './RatingStars';
 import FuelChips from './FuelChips';
-import { FuelTypeFilter } from '../../store/stationsSlice';
+import type { FuelTypeFilter } from '../../store/stationsSlice';
 
 interface SidePanelProps {
   open: boolean;
@@ -93,17 +93,17 @@ const SidePanel: React.FC<SidePanelProps> = memo(({
           <FavoriteIcon color="error" fontSize="small" />
           Favorites
         </Typography>
-        {favorites.length === 0 ? (
+        {(!favorites || favorites.length === 0) ? (
           <Typography variant="body2" color="text.secondary">
             No favorites yet
           </Typography>
         ) : (
           <List dense>
             {favorites.map((station) => (
-              <ListItemButton key={station.station_id} onClick={() => onStationClick(station)}>
+              <ListItemButton key={station?.station_id ?? Math.random()} onClick={() => onStationClick && station && onStationClick(station)}>
                 <ListItemText
-                  primary={station.name}
-                  secondary={station.address}
+                  primary={station?.name ?? 'Unknown'}
+                  secondary={station?.address ?? ''}
                 />
               </ListItemButton>
             ))}
@@ -119,17 +119,17 @@ const SidePanel: React.FC<SidePanelProps> = memo(({
           <HistoryIcon color="primary" fontSize="small" />
           Recent
         </Typography>
-        {recent.length === 0 ? (
+        {(!recent || recent.length === 0) ? (
           <Typography variant="body2" color="text.secondary">
             No recent stations
           </Typography>
         ) : (
           <List dense>
             {recent.map((station) => (
-              <ListItemButton key={station.station_id} onClick={() => onStationClick(station)}>
+              <ListItemButton key={station?.station_id ?? Math.random()} onClick={() => onStationClick && station && onStationClick(station)}>
                 <ListItemText
-                  primary={station.name}
-                  secondary={station.city}
+                  primary={station?.name ?? 'Unknown'}
+                  secondary={station?.city ?? ''}
                 />
               </ListItemButton>
             ))}
@@ -192,20 +192,30 @@ const SidePanel: React.FC<SidePanelProps> = memo(({
           <DownloadIcon color="success" fontSize="small" />
           Download Maps
         </Typography>
-        {offlinePackages.length === 0 ? (
+        {(!offlinePackages || offlinePackages.length === 0) ? (
           <Typography variant="body2" color="text.secondary">
             No offline packages
           </Typography>
         ) : (
           <List dense>
-            {offlinePackages.map((pkg) => (
-              <ListItemButton key={pkg.package_id} onClick={() => onPackageClick(pkg)}>
-                <ListItemText
-                  primary={pkg.name}
-                  secondary={`${pkg.min_lat.toFixed(2)}, ${pkg.min_lon.toFixed(2)} - ${pkg.max_lat.toFixed(2)}, ${pkg.max_lon.toFixed(2)}`}
-                />
-              </ListItemButton>
-            ))}
+            {offlinePackages.map((pkg) => {
+              const minLat = Number(pkg?.min_lat);
+              const minLon = Number(pkg?.min_lon);
+              const maxLat = Number(pkg?.max_lat);
+              const maxLon = Number(pkg?.max_lon);
+              const coordText = Number.isFinite(minLat) && Number.isFinite(minLon) && Number.isFinite(maxLat) && Number.isFinite(maxLon)
+                ? `${minLat.toFixed(2)}, ${minLon.toFixed(2)} - ${maxLat.toFixed(2)}, ${maxLon.toFixed(2)}`
+                : '';
+
+              return (
+                <ListItemButton key={pkg?.package_id ?? Math.random()} onClick={() => onPackageClick && pkg && onPackageClick(pkg)}>
+                  <ListItemText
+                    primary={pkg?.name ?? 'Package'}
+                    secondary={coordText}
+                  />
+                </ListItemButton>
+              );
+            })}
           </List>
         )}
       </Box>

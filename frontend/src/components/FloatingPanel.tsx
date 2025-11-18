@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, List, ListItem, ListItemText, ListItemIcon, Divider, Collapse, Typography, Button } from '@mui/material';
+import { Box, List, ListItem, ListItemText, ListItemIcon, Divider, Collapse, Typography, Button, ListItemButton } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import HistoryIcon from '@mui/icons-material/History';
 import MapIcon from '@mui/icons-material/Map';
@@ -48,10 +48,12 @@ const FloatingPanel: React.FC<FloatingPanelProps> = ({ stations }) => {
                 {isHovered ? (
                     <Box sx={{ p: 2 }}>
                         {/* Favorite Stations */}
-                        <ListItem button onClick={() => setOpenFavorites(!openFavorites)} sx={{ '&:hover': { transform: 'scale(1.05)' }, transition: 'transform 0.2s' }}>
-                            <ListItemIcon><FavoriteIcon color="error" /></ListItemIcon>
-                            <ListItemText primary="Favorite Stations" />
-                            {openFavorites ? <ExpandLess /> : <ExpandMore />}
+                        <ListItem sx={{ p: 0 }}>
+                            <ListItemButton onClick={() => setOpenFavorites(!openFavorites)} sx={{ '&:hover': { transform: 'scale(1.05)' }, transition: 'transform 0.2s' }}>
+                                <ListItemIcon><FavoriteIcon color="error" /></ListItemIcon>
+                                <ListItemText primary="Favorite Stations" />
+                                {openFavorites ? <ExpandLess /> : <ExpandMore />}
+                            </ListItemButton>
                         </ListItem>
                         <Collapse in={openFavorites} timeout="auto" unmountOnExit>
                             {/* ... Favorites list content ... */}
@@ -73,15 +75,21 @@ const FloatingPanel: React.FC<FloatingPanelProps> = ({ stations }) => {
                         <Divider sx={{ my: 1, bgcolor: 'rgba(255, 255, 255, 0.2)' }} />
                         
                         {/* Download Maps Section */}
-                        <ListItem button onClick={() => setOpenDownloaded(!openDownloaded)} sx={{ '&:hover': { transform: 'scale(1.05)' }, transition: 'transform 0.2s' }}>
-                            <ListItemIcon><MapIcon color="success" /></ListItemIcon>
-                            <ListItemText primary="Download Maps" />
-                            {openDownloaded ? <ExpandLess /> : <ExpandMore />}
+                        <ListItem sx={{ p: 0 }}>
+                            <ListItemButton onClick={() => setOpenDownloaded(!openDownloaded)} sx={{ '&:hover': { transform: 'scale(1.05)' }, transition: 'transform 0.2s' }}>
+                                <ListItemIcon><MapIcon color="success" /></ListItemIcon>
+                                <ListItemText primary="Download Maps" />
+                                {openDownloaded ? <ExpandLess /> : <ExpandMore />}
+                            </ListItemButton>
                         </ListItem>
                         <Collapse in={openDownloaded} timeout="auto" unmountOnExit>
                             <List component="div" disablePadding sx={{ pl: 4 }}>
                                 {mockDownloadedMaps.map(map => (
-                                    <ListItem key={map} button><ListItemText primary={map} sx={{ color: 'rgba(255, 255, 255, 0.7)' }} /></ListItem>
+                                    <ListItem key={map} sx={{ p: 0 }}>
+                                        <ListItemButton>
+                                            <ListItemText primary={map} sx={{ color: 'rgba(255, 255, 255, 0.7)' }} />
+                                        </ListItemButton>
+                                    </ListItem>
                                 ))}
                             </List>
                         </Collapse>

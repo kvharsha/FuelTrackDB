@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { setTheme } from '../store/uiSlice';
-import { dbHelpers } from '../db/dexieDb';
-import { FuelTypeFilter } from '../store/stationsSlice';
+// Temporarily disable Dexie usage in Preferences to avoid IndexedDB issues in CI/dev
+// import { dbHelpers } from '../db/dexieDb';
+import type { FuelTypeFilter } from '../store/stationsSlice';
 
 const PreferencesPage: React.FC = () => {
     const navigate = useNavigate();
@@ -19,31 +20,28 @@ const PreferencesPage: React.FC = () => {
     const [units, setUnits] = useState<'km' | 'mi'>('km');
 
     useEffect(() => {
-        // Load preferences from Dexie
-        const loadPreferences = async () => {
-            const fuelType = await dbHelpers.getSetting<FuelTypeFilter>('defaultFuelType', 'petrol');
-            const radius = await dbHelpers.getSetting<number>('defaultRadius', 10);
-            const speed = await dbHelpers.getSetting<number>('speedProfile', 50);
-            const saver = await dbHelpers.getSetting<boolean>('dataSaver', false);
-            const unit = await dbHelpers.getSetting<'km' | 'mi'>('units', 'km');
-            
-            setDefaultFuelType(fuelType);
-            setDefaultRadius(radius);
-            setSpeedProfile(speed);
-            setDataSaver(saver);
-            setUnits(unit);
-        };
-        
-        loadPreferences();
+        // Dexie is disabled for now; load preferences from localStorage as a fallback
+        const fuelType = (localStorage.getItem('pref_defaultFuelType') as FuelTypeFilter) || 'petrol';
+        const radius = Number(localStorage.getItem('pref_defaultRadius')) || 10;
+        const speed = Number(localStorage.getItem('pref_speedProfile')) || 50;
+        const saver = localStorage.getItem('pref_dataSaver') === 'true';
+        const unit = (localStorage.getItem('pref_units') as 'km' | 'mi') || 'km';
+
+        setDefaultFuelType(fuelType);
+        setDefaultRadius(radius);
+        setSpeedProfile(speed);
+        setDataSaver(saver);
+        setUnits(unit);
     }, []);
 
     const handleSave = async () => {
-        await dbHelpers.setSetting('defaultFuelType', defaultFuelType);
-        await dbHelpers.setSetting('defaultRadius', defaultRadius);
-        await dbHelpers.setSetting('speedProfile', speedProfile);
-        await dbHelpers.setSetting('dataSaver', dataSaver);
-        await dbHelpers.setSetting('units', units);
-        alert('Preferences saved!');
+        // Temporarily persist preferences in localStorage while Dexie is disabled
+    localStorage.setItem('pref_defaultFuelType', String(defaultFuelType));
+        localStorage.setItem('pref_defaultRadius', String(defaultRadius));
+        localStorage.setItem('pref_speedProfile', String(speedProfile));
+        localStorage.setItem('pref_dataSaver', String(dataSaver));
+        localStorage.setItem('pref_units', units);
+        alert('Preferences saved locally (Dexie disabled).');
     };
 
     return (

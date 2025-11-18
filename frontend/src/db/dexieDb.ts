@@ -1,8 +1,8 @@
-import Dexie, { Table } from 'dexie';
-import { Station } from '../api/stations';
-import { StationFuel } from '../api/stations';
-import { OfflinePackage } from '../api/offline';
-import { Review } from '../api/reviews';
+import Dexie from 'dexie';
+import type { Table } from 'dexie';
+import type { Station, StationFuel } from '../api/stations';
+import type { OfflinePackage } from '../api/offline';
+import type { Review } from '../api/reviews';
 
 export interface StationRecord extends Station {
   id?: number;
@@ -82,6 +82,27 @@ class FuelTrackDB extends Dexie {
 
 export const db = new FuelTrackDB();
 
+// Safe init helper - call this before performing DB operations to ensure
+// the database is open and recover from simple open failures in dev.
+export async function initDb(): Promise<void> {
+  try {
+    if (!db.isOpen()) {
+      await db.open();
+    }
+  } catch (err) {
+    console.error('Dexie open error, attempting recovery by deleting DB and reopening:', err);
+    try {
+      await Dexie.delete('FuelTrackDB');
+      // Recreate instance and open
+      // Note: the exported `db` instance already has schema; just re-open
+      await db.open();
+    } catch (recoveryErr) {
+      console.error('Dexie recovery failed:', recoveryErr);
+      // Let callers handle the failure - they should use try/catch
+      throw recoveryErr;
+    }
+  }
+}
 // Helper functions
 export const dbHelpers = {
   // Stations

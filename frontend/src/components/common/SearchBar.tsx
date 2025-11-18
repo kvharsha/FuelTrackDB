@@ -3,7 +3,7 @@ import { Paper, InputBase, IconButton, Box, Typography, Fade } from '@mui/materi
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Station } from '../../api/stations';
+import type { Station } from '../../api/stations';
 import { fuzzySearch } from '../../utils/fuzzy';
 
 interface SearchBarProps {

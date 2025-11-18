@@ -1,5 +1,5 @@
-import { LatLngTuple } from '../store/mapSlice';
-import { km, LatLng, tupleToLatLng } from './haversine';
+import type { LatLngTuple } from '../store/mapSlice';
+import { km, tupleToLatLng } from './haversine';
 
 export interface GridNode {
   row: number;
@@ -25,13 +25,7 @@ const GRID_RESOLUTION = 100; // meters (approximate cell size)
 /**
  * Convert degrees to approximate meters (rough approximation)
  */
-function latToMeters(lat: number): number {
-  return 111320 * lat; // 1 degree latitude ≈ 111.32 km
-}
 
-function lngToMeters(lng: number, lat: number): number {
-  return 111320 * Math.cos(lat * Math.PI / 180) * lng;
-}
 
 /**
  * Create a coarse grid for A* pathfinding

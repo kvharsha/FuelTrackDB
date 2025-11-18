@@ -8,6 +8,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Disable service worker in development to avoid caching issues
+      devOptions: {
+        enabled: false,
+        type: 'module',
+      },
       includeAssets: ['favicon.ico', 'auth-background-image.jpg'],
       manifest: {
         name: 'FuelTrackDB',

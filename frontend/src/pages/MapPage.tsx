@@ -20,7 +20,10 @@ import { geolocation } from '../utils/geolocation';
 import { km, tupleToLatLng } from '../utils/haversine';
 import { findPath } from '../utils/gridSearch';
 import type { Bounds } from '../utils/gridSearch';
-import { dbHelpers } from '../db/dexieDb';
+// Temporarily disable IndexedDB/Dexie usage to avoid runtime/test issues.
+// We'll re-enable and fix Dexie interactions later.
+// import { dbHelpers, initDb } from '../db/dexieDb';
+import NavigationHandler from '../components/NavigationHandler';
 import SearchBar from '../components/common/SearchBar';
 import MapControls from '../components/common/MapControls';
 import LayerPicker from '../components/common/LayerPicker';
@@ -114,7 +117,7 @@ const MapPage: React.FC = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Load stations and fuels
+                // Temporarily skip IndexedDB usage (disabled) and load everything from network
                 const [stationsData, fuelsData, favoritesData, packagesData] = await Promise.all([
                     stationsApi.getStations(),
                     stationsApi.getStationFuels(),
@@ -126,21 +129,9 @@ const MapPage: React.FC = () => {
                 setStationFuels(fuelsData);
                 dispatch(setFavorites(favoritesData.map(f => f.station)));
                 dispatch(setPackages(packagesData));
-
-                // Cache to Dexie
-                await dbHelpers.cacheStations(stationsData);
-                await dbHelpers.cacheStationFuels(fuelsData);
-
-                // Load recent from Dexie
-                const recentStations = await dbHelpers.getRecent();
-                recentStations.forEach(s => dispatch(addRecent(s)));
             } catch (error) {
                 console.error('Error loading data:', error);
-                // Try loading from cache
-                const cachedStations = await dbHelpers.getCachedStations();
-                if (cachedStations.length > 0) {
-                    dispatch(setStations(cachedStations));
-                }
+                // No cache fallback while Dexie is disabled
             }
         };
 
@@ -209,7 +200,7 @@ const MapPage: React.FC = () => {
             dispatch(setZoom(16));
             dispatch(setCurrentStation(station));
             dispatch(addRecent(station));
-            dbHelpers.addRecent(station);
+            // Temporarily disabled IndexedDB caching - dbHelpers.addRecent(station);
             setLastVisitedStation(station);
         }
     }, [dispatch]);
@@ -220,50 +211,9 @@ const MapPage: React.FC = () => {
         dispatch(setCurrentStation(station));
     }, [dispatch]);
 
-    // Navigation handler component
-    const NavigationHandler: React.FC = () => {
-        const map = useMap();
-        
-        useEffect(() => {
-            if (!navigatingTo || !userLocation || !navigatingTo.latitude || !navigatingTo.longitude) {
-                if (!navigatingTo) {
-                    dispatch(clearRoute());
-                }
-                return;
-            }
-
-            const start: [number, number] = userLocation;
-            const end: [number, number] = [
-                parseFloat(String(navigatingTo.latitude)),
-                parseFloat(String(navigatingTo.longitude)),
-            ];
-
-            const bounds = map.getBounds();
-            const mapBounds: Bounds = {
-                minLat: bounds.getSouth(),
-                maxLat: bounds.getNorth(),
-                minLng: bounds.getWest(),
-                maxLng: bounds.getEast(),
-            };
-
-            // Find path using A*
-            const path = findPath(start, end, mapBounds);
-
-            // Calculate total distance
-            let totalDistance = 0;
-            for (let i = 0; i < path.length - 1; i++) {
-                totalDistance += km(tupleToLatLng(path[i]), tupleToLatLng(path[i + 1]));
-            }
-
-            // Calculate ETA (assuming 50 km/h average speed)
-            const speedKmh = 50;
-            const etaMins = (totalDistance / speedKmh) * 60;
-
-            dispatch(setRoute({ route: path, distanceKm: totalDistance, etaMins }));
-        }, [map, navigatingTo, userLocation, dispatch]);
-        
-        return null;
-    };
+    // NavigationHandler is implemented as a standalone component in
+    // `frontend/src/components/NavigationHandler.tsx` and imported above.
+    // We intentionally do not recreate it here to avoid remount loops.
 
     // Handle favorite toggle
     const handleToggleFavorite = useCallback(async (stationId: number) => {
@@ -325,25 +275,26 @@ const MapPage: React.FC = () => {
 
     // Get price color based on relative price (green = cheapest, red = most expensive)
     const getPriceColor = useCallback((price: number | undefined) => {
-        if (!price) return '#ff9800'; // Orange for no price
-        
+        const priceNum = Number(price);
+        if (!Number.isFinite(priceNum)) return '#ff9800'; // Orange for no price
+
         const prices = filteredStations
             .map(s => {
                 const fuelInfo = getStationFuelInfo(s.station_id);
-                return fuelInfo?.price_per_unit;
+                return Number(fuelInfo?.price_per_unit);
             })
-            .filter((p): p is number => p !== undefined);
-        
+            .filter((p): p is number => Number.isFinite(p));
+
         if (prices.length === 0) return '#4caf50';
-        
+
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
         const priceRange = maxPrice - minPrice;
-        
+
         if (priceRange === 0) return '#4caf50';
-        
-        const normalizedPrice = (price - minPrice) / priceRange;
-        
+
+        const normalizedPrice = (priceNum - minPrice) / priceRange;
+
         // Green to red gradient
         if (normalizedPrice < 0.33) return '#4caf50'; // Green (cheapest)
         if (normalizedPrice < 0.66) return '#ff9800'; // Orange (medium)
@@ -371,9 +322,7 @@ const MapPage: React.FC = () => {
                 <WelcomeToast
                     firstName={firstName}
                     show={true}
-                    onHide={() => {
-                        dispatch(setWelcomeShown(true));
-                    }}
+                    onHide={React.useCallback(() => dispatch(setWelcomeShown(true)), [dispatch])}
                 />
             )}
 
@@ -465,7 +414,10 @@ const MapPage: React.FC = () => {
                                     </Typography>
                                     {fuelInfo && (
                                         <Typography variant="body2" sx={{ mb: 1 }}>
-                                            Price: ₹{fuelInfo.price_per_unit?.toFixed(2)}/unit
+                                            {(() => {
+                                                const p = Number(fuelInfo.price_per_unit);
+                                                return Number.isFinite(p) ? `Price: ₹${p.toFixed(2)}/unit` : 'Price: N/A';
+                                            })()}
                                         </Typography>
                                     )}
                                     <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
@@ -498,7 +450,7 @@ const MapPage: React.FC = () => {
                 })}
 
                 {/* Navigation Handler */}
-                <NavigationHandler />
+                <NavigationHandler navigatingTo={navigatingTo} userLocation={userLocation} />
 
                 {/* Route Polyline */}
                 {route.length > 0 && (
