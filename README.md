@@ -17,6 +17,13 @@ FuelTrackDB delivers a Google Maps–like experience with features such as:
 - Offline map packages and caching
 - Role-based Admin Portal for management
 
+<img width="1004" height="524" alt="image" src="https://github.com/user-attachments/assets/13618fb7-124f-4211-b503-c83d2e968508" />
+
+<img width="1004" height="519" alt="image" src="https://github.com/user-attachments/assets/5e93cf7a-da4d-4da9-9ad5-62dedf89bab6" />
+
+<img width="1004" height="519" alt="image" src="https://github.com/user-attachments/assets/81b76568-9157-4be2-967d-f953714a548c" />
+
+<img width="1004" height="868" alt="image" src="https://github.com/user-attachments/assets/a9580fd1-75ef-4d10-bf29-a0eb2e671b9f" />
 ---
 
 ## Table of Contents
